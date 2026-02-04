@@ -2,7 +2,7 @@
 
 # 📷 AnyCam2Ros
 
-**Turn Any Camera into ROS2 Image Topics — No Expensive Hardware Required**
+**Turn Any Camera into ROS2 Image Topics — Unified Pipeline for Any Hardware**
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![ROS2](https://img.shields.io/badge/ROS2-Humble%20%7C%20Iron%20%7C%20Jazzy-green.svg)](https://docs.ros.org/)
@@ -18,34 +18,38 @@
 
 ### 🎯 What Problem Does This Solve?
 
-When deploying **VLA models** (like [π₀ (pi-zero)](https://www.physicalintelligence.company/blog/pi0), [OpenVLA](https://openvla.github.io/)) on real robots, or collecting **SFT demonstration data** for robot learning, you need camera feeds as ROS2 image topics. 
+When deploying **VLA models** (like [π₀ (pi-zero)](https://www.physicalintelligence.company/blog/pi0), [OpenVLA](https://openvla.github.io/)) on real robots, or collecting **SFT demonstration data** for robot learning, you need camera feeds as ROS2 image topics.
 
-But here's the frustrating reality:
+But here's the reality:
 
 ```
 The Problem:
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  💸 "I need to buy a $300+ RealSense just to test my VLA model?"        │
-│  🔧 "My DIY robot arm doesn't have a standard camera mount"             │
-│  📱 "I have 3 old phones sitting in a drawer..."                        │
-│  ⏰ "Writing cam2image launch files for each camera is tedious"          │
+│  🔄 "I want to align with an existing dataset collected on different    │
+│      hardware — how do I replicate the same camera setup?"              │
+│                                                                         │
+│  🎥 "My data was collected with Insta360 GO 3S, RealSense, USB webcams  │
+│      on different machines — I need a unified way to configure them"   │
+│                                                                         │
+│  ⏰ "Writing cam2image launch files for each camera is tedious"         │
+│                                                                         │
 │  🔀 "Camera device IDs keep changing after every reboot!"               │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-**AnyCam2Ros solves all of this:**
+**AnyCam2Ros provides a unified solution:**
 
 ```
 The Solution:
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  📱 Android Phone     ─┐                                                │
+│  🎥 Insta360 GO 3S    ─┐                                                │
 │  📷 USB Webcam        ─┼──▶  /dev/video*  ──▶  AnyCam2Ros  ──▶  ROS2   │
-│  🎥 Any V4L2 Device   ─┘                         CLI           Topics  │
+│  🤖 Any V4L2 Device   ─┘                         CLI           Topics  │
 │                                                                         │
-│  ✅ Zero-cost hardware (use what you have)                              │
-│  ✅ Stable device paths (no more reordering)                            │
+│  ✅ Unified config across different hardware                            │
+│  ✅ Stable device paths (no more reordering after reboot)              │
 │  ✅ One command to configure everything                                 │
-│  ✅ Production-ready launch scripts                                     │
+│  ✅ Shareable JSON config for dataset alignment                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -55,11 +59,11 @@ The Solution:
 
 | Scenario | How AnyCam2Ros Helps |
 |----------|---------------------|
-| **VLA Model Deployment** | Use your phone as the robot's eye to test π₀, OpenVLA, RT-2 |
-| **SFT Data Collection** | Collect manipulation demos without buying expensive cameras |
-| **DIY Robot Arms** | Mount any USB camera or phone on your custom robot |
-| **Multi-Camera Setup** | Configure 2-4 cameras in minutes, not hours |
-| **Rapid Prototyping** | Start testing immediately with zero hardware investment |
+| **Dataset Alignment** | Replicate camera setups from existing datasets on your hardware |
+| **VLA Model Deployment** | Quickly configure cameras for π₀, OpenVLA, RT-2 deployment |
+| **SFT Data Collection** | Unified pipeline for collecting manipulation demos |
+| **Multi-Camera Setup** | Configure 2-4 cameras in minutes with consistent naming |
+| **Cross-Machine Sharing** | Export/import JSON configs between different robots |
 
 ---
 
@@ -69,39 +73,15 @@ In Linux, **everything is a file**. If your device can produce video, it becomes
 
 | Device Type | Example | Works with AnyCam2Ros? |
 |-------------|---------|------------------------|
-| USB Webcam | Logitech C920 | ✅ Yes |
+| Action Camera | Insta360 GO 3S, GoPro (as webcam) | ✅ Yes |
+| Depth Camera | RealSense (RGB stream) | ✅ Yes |
+| USB Webcam | Logitech C920, generic UVC | ✅ Yes |
 | Industrial Camera | FLIR, Basler (with V4L2 driver) | ✅ Yes |
-| Android Phone | Via USB Webcam mode or DroidCam | ✅ Yes |
-| Capture Card | Elgato, cheap HDMI grabbers | ✅ Yes |
+| Phone as Webcam | Android USB Webcam mode, DroidCam | ✅ Yes |
+| Capture Card | Elgato, HDMI grabbers | ✅ Yes |
 | Virtual Camera | OBS Virtual Cam, v4l2loopback | ✅ Yes |
 
 **If it shows up in `/dev/video*`, we can publish it to ROS2.**
-
----
-
-## 📱 Turn Your Phone into a Robot Camera
-
-You don't need a RealSense. Your phone camera is probably better than most webcams anyway.
-
-### Method 1: Native USB Webcam Mode (Easiest)
-
-Many modern Android phones have built-in USB webcam support:
-
-1. Connect phone to computer via USB
-2. In the USB options popup, select **"Webcam"** (not "File Transfer")
-3. Your phone appears as `/dev/videoX` — done!
-
-> ✅ Tested on: Google Pixel 4+, Samsung Galaxy S20+, OnePlus 8+
-
-### Method 2: Apps (Universal)
-
-| App | Platform | Connection | Notes |
-|-----|----------|------------|-------|
-| **DroidCam** | Android/iOS | USB or WiFi | Free, reliable |
-| **Iriun Webcam** | Android/iOS | USB or WiFi | High quality |
-| **IP Webcam** | Android | WiFi only | Good for wireless |
-
-**Recommended setup:** USB connection for lowest latency (important for real-time robot control).
 
 ---
 
@@ -113,7 +93,7 @@ Many modern Android phones have built-in USB webcam support:
 | 🛡️ **Stable Paths** | Uses `/dev/v4l/by-id` so camera order survives reboots |
 | 🎨 **Beautiful CLI** | Rich interactive TUI with tables, spinners, and colors |
 | ⚡ **Zero Boilerplate** | Generates optimized `cam2image` scripts instantly |
-| 📦 **Shareable Config** | JSON config for team collaboration |
+| 📦 **Shareable Config** | JSON config for team collaboration and dataset alignment |
 
 ---
 
@@ -185,7 +165,7 @@ python3 scripts/camera_cli.py
 
 ### Regenerate from Config
 
-Share your `cameras.json` with teammates:
+Share your `cameras.json` with teammates or across machines:
 
 ```bash
 python3 scripts/camera_cli.py --from-config
