@@ -37,11 +37,10 @@
 
 ```mermaid
 graph LR
-    A[📱 Phone / 📷 USB Cam] -->|USB/WiFi| B(Linux Kernel /dev/video*)
-    B --> C{AnyCam2Ros}
-    C -->|Generate| D[Startup Scripts]
-    D -->|Run| E((ROS 2 Topic))
-    style C fill:#f9f,stroke:#333,stroke-width:4px
+    A[📱 手机 / 📷 USB 摄像头] -->|USB/WiFi| B[Linux /dev/video*]
+    B --> C[AnyCam2Ros]
+    C -->|生成| D[启动脚本]
+    D -->|运行| E[ROS 2 Topic]
 ```
 
 ## 🚀 为什么选择 "AnyCam"?
