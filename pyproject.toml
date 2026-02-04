@@ -1,11 +1,11 @@
 [project]
 name = "anycam2ros"
 version = "1.0.0"
-description = "Discover Linux cameras and generate ROS2 cam2image launch scripts"
+description = "Turn any camera into ROS2 image topics. Unified config for VLA deployment and SFT data collection."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.8"
-keywords = ["ros2", "camera", "v4l2", "robotics", "image-tools"]
+keywords = ["ros2", "camera", "v4l2", "robotics", "image-tools", "vla"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -27,9 +27,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-username/AnyCam2Ros"
-Repository = "https://github.com/your-username/AnyCam2Ros"
-Issues = "https://github.com/your-username/AnyCam2Ros/issues"
+Homepage = "https://github.com/ly-geming/AnyCam2Ros"
+Repository = "https://github.com/ly-geming/AnyCam2Ros"
+Issues = "https://github.com/ly-geming/AnyCam2Ros/issues"
 
 [project.scripts]
 anycam2ros = "scripts.camera_cli:main"
@@ -57,8 +57,8 @@ quote-style = "double"
 indent-style = "space"
 
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools]
+[tool.hatch.build.targets.wheel]
 packages = ["scripts"]

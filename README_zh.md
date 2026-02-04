@@ -106,8 +106,8 @@
 git clone https://github.com/ly-geming/AnyCam2Ros.git
 cd AnyCam2Ros
 
-# 安装（包含 Rich 精美 CLI）
-pip install -e .
+# 安装依赖
+pip install rich
 ```
 
 ### 前置依赖

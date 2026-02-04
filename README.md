@@ -106,8 +106,8 @@ In Linux, **everything is a file**. If your device can produce video, it becomes
 git clone https://github.com/ly-geming/AnyCam2Ros.git
 cd AnyCam2Ros
 
-# Install (includes Rich for beautiful CLI)
-pip install -e .
+# Install dependencies
+pip install rich
 ```
 
 ### Prerequisites
