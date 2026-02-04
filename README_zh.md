@@ -1,111 +1,181 @@
-<h1 align="center">
-  <br>
-  AnyCam2Ros
-  <br>
-</h1>
+<div align="center">
 
-<p align="center">
-  <strong>将 <i>任意</i> 摄像头瞬间接入 ROS2</strong>
-</p>
+# 📷 AnyCam2Ros
 
-<p align="center">
-  无论是<b>工业相机</b>、<b>USB 摄像头</b>，还是你的<b>旧安卓手机</b>，几秒钟内即可变身为 ROS2 节点。
-</p>
+**将任意摄像头变成 ROS2 图像话题 — 无需昂贵硬件**
 
-<p align="center">
-  <a href="#为什么选择-anycam">为什么选择 AnyCam?</a> •
-  <a href="#特性">特性</a> •
-  <a href="#快速开始">快速开始</a> •
-  <a href="#手机变摄像头">手机变摄像头</a> •
-  <a href="./README.md">English</a>
-</p>
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![ROS2](https://img.shields.io/badge/ROS2-Humble%20%7C%20Iron%20%7C%20Jazzy-green.svg)](https://docs.ros.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python 3.8+">
-  <img src="https://img.shields.io/badge/ROS2-Humble%20%7C%20Iron%20%7C%20Jazzy-green.svg" alt="ROS2">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
-  <img src="https://img.shields.io/badge/AnyCam-Universal-purple.svg" alt="AnyCam">
-</p>
+[English](README.md) | [中文文档](README_zh.md)
+
+</div>
 
 ---
 
-<p align="center">
-  <i>告别手写重复的启动文件。<br>自动发现、交互式配置、一键启动。</i>
-</p>
+## 📖 概述
 
----
+### 🎯 解决什么问题？
 
-```mermaid
-graph LR
-    A[📱 手机 / 📷 USB 摄像头] -->|USB/WiFi| B[Linux /dev/video*]
-    B --> C[AnyCam2Ros]
-    C -->|生成| D[启动脚本]
-    D -->|运行| E[ROS 2 Topic]
+当你想在真实机器人上部署 **VLA 模型**（如 [π₀ (pi-zero)](https://www.physicalintelligence.company/blog/pi0)、[OpenVLA](https://openvla.github.io/)），或者为机器人学习采集 **SFT 演示数据** 时，你需要将摄像头画面作为 ROS2 图像话题发布。
+
+但现实往往令人头疼：
+
+```
+痛点问题：
+┌─────────────────────────────────────────────────────────────────────────┐
+│  💸 "测试个 VLA 模型还得买 300+ 美元的 RealSense？"                        │
+│  🔧 "我 DIY 的机械臂没有标准相机安装位"                                    │
+│  📱 "抽屉里躺着 3 部旧手机..."                                            │
+│  ⏰ "给每个摄像头写 cam2image 启动文件太繁琐了"                             │
+│  🔀 "每次重启后摄像头设备号都会变！"                                        │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 为什么选择 "AnyCam"?
+**AnyCam2Ros 一次性解决所有问题：**
 
-在 Linux 的世界里，**一切皆文件**。
+```
+解决方案：
+┌─────────────────────────────────────────────────────────────────────────┐
+│  📱 安卓手机          ─┐                                                │
+│  📷 USB 摄像头        ─┼──▶  /dev/video*  ──▶  AnyCam2Ros  ──▶  ROS2   │
+│  🎥 任何 V4L2 设备    ─┘                         CLI           Topics  │
+│                                                                         │
+│  ✅ 零成本硬件（用你手头有的）                                            │
+│  ✅ 稳定设备路径（不再乱序）                                              │
+│  ✅ 一条命令搞定所有配置                                                  │
+│  ✅ 生产级启动脚本                                                       │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
-只要你的设备能产生视频流，它就有 99% 的概率能映射为 `/dev/video*` 文件。
-**AnyCam2Ros** 并不在乎你使用的是价值 5000 美元的全局快门工业相机，还是你抽屉里闲置的旧安卓手机。
+**AnyCam2Ros = 任意摄像头 → ROS2 图像话题 → VLA 训练 / 机器人部署**
 
-**只要它能在 `/dev/video*` 中出现，我们就能让它变成 ROS 话题。**
+### 🤖 应用场景
+
+| 场景 | AnyCam2Ros 如何帮助 |
+|------|---------------------|
+| **VLA 模型部署** | 用手机当机器人的眼睛，测试 π₀、OpenVLA、RT-2 |
+| **SFT 数据采集** | 采集操作演示数据，无需购买昂贵相机 |
+| **DIY 机械臂** | 在自制机器人上安装任意 USB 摄像头或手机 |
+| **多相机配置** | 几分钟配置 2-4 个摄像头，而不是几小时 |
+| **快速原型验证** | 零硬件投入，立即开始测试 |
+
+---
+
+## 💡 为什么是 "Any" Camera？
+
+在 Linux 中，**一切皆文件**。如果你的设备能产生视频，它就会变成 `/dev/video*`。
+
+| 设备类型 | 示例 | 支持 AnyCam2Ros？ |
+|----------|------|-------------------|
+| USB 摄像头 | 罗技 C920 | ✅ 支持 |
+| 工业相机 | FLIR, Basler (带 V4L2 驱动) | ✅ 支持 |
+| 安卓手机 | USB Webcam 模式或 DroidCam | ✅ 支持 |
+| 采集卡 | Elgato, 廉价 HDMI 采集器 | ✅ 支持 |
+| 虚拟摄像头 | OBS Virtual Cam, v4l2loopback | ✅ 支持 |
+
+**只要它出现在 `/dev/video*`，我们就能把它发布到 ROS2。**
+
+---
+
+## 📱 把手机变成机器人相机
+
+你不需要 RealSense。你的手机摄像头可能比大多数网络摄像头都好。
+
+### 方法一：原生 USB Webcam 模式（最简单）
+
+很多现代安卓手机内置 USB 摄像头支持：
+
+1. 用 USB 线连接手机和电脑
+2. 在弹出的 USB 选项中选择 **"网络摄像头/Webcam"**（不是"文件传输"）
+3. 手机会作为 `/dev/videoX` 出现 — 搞定！
+
+> ✅ 已测试：Google Pixel 4+、三星 Galaxy S20+、一加 8+
+
+### 方法二：App 方案（通用）
+
+| App | 平台 | 连接方式 | 备注 |
+|-----|------|----------|------|
+| **DroidCam** | Android/iOS | USB 或 WiFi | 免费，稳定 |
+| **Iriun Webcam** | Android/iOS | USB 或 WiFi | 高画质 |
+| **IP Webcam** | Android | 仅 WiFi | 适合无线场景 |
+
+**推荐配置：** USB 连接以获得最低延迟（对实时机器人控制很重要）。
+
+---
 
 ## ✨ 特性
 
-- **📱 通用支持** — 支持 USB 摄像头、虚拟摄像头以及手机摄像头。
-- **🔍 自动发现** — 瞬间扫描 `/dev/video*` 并识别硬件信息。
-- **🛡️ 稳定路径** — 自动解析稳定路径（`/dev/v4l/by-id`），确保重启后摄像头顺序不乱。
-- **🎨 精美 CLI** — 丰富多彩的交互式终端体验，引导你轻松完成配置。
-- **⚡ 零样板代码** — 生成优化过的 `cam2image` 启动脚本，直接用于生产环境。
-
-## 📱 将安卓手机变成 ROS 摄像头
-
-你不需要昂贵的硬件也能开始开发计算机视觉算法。现在的手机摄像头往往比大多数网络摄像头都要好！
-
-1. **USB 网络摄像头模式（最简单）**
-   - 许多现代安卓手机（Google Pixel, 三星等）在插入 USB 时有原生的“网络摄像头”模式。
-   - 在 USB 选项中选择“网络摄像头” (Webcam) 而不是“文件传输”。
-   - 它会直接作为 `/dev/videoX` 出现在你的电脑上。搞定！
-
-2. **App 方案（通用）**
-   - 安装 **DroidCam**、**IP Webcam** 或 **Iriun** 等应用。
-   - 通过 USB（推荐，低延迟）或 WiFi 连接。
-   - 这些工具会创建虚拟视频设备（例如通过 `v4l2loopback`）或暴露标准 UVC 接口。
-
-一旦手机连接成功，只需运行 `AnyCam2Ros`，它就会像普通摄像头一样被检测到。
-
-## 📦 环境要求
-
-| 依赖 | 说明 |
+| 特性 | 描述 |
 |------|------|
-| **Linux** | 需要 V4L2 设备支持 |
-| **Python 3.8+** | CLI 运行环境 |
-| **ROS2** | 需要 `image_tools` 包 (`sudo apt install ros-<distro>-image-tools`) |
-| **v4l-utils** | 用于硬件探测 (`sudo apt install v4l-utils`) |
+| 🔍 **自动发现** | 扫描所有 `/dev/video*` 设备并显示硬件信息 |
+| 🛡️ **稳定路径** | 使用 `/dev/v4l/by-id`，重启后摄像头顺序不变 |
+| 🎨 **精美 CLI** | 基于 Rich 的交互式界面，带表格、动画和彩色输出 |
+| ⚡ **零样板代码** | 即时生成优化的 `cam2image` 脚本 |
+| 📦 **可分享配置** | JSON 配置文件便于团队协作 |
 
-## ⚡ 快速开始
+---
+
+## 🚀 快速开始
+
+### 安装
 
 ```bash
-# 1. 克隆仓库
-git clone https://github.com/your-username/AnyCam2Ros.git
+# 克隆仓库
+git clone https://github.com/ly-geming/AnyCam2Ros.git
 cd AnyCam2Ros
 
-# 2. 安装依赖 (用于精美的 UI)
+# 安装（包含 Rich 精美 CLI）
 pip install -e .
+```
 
-# 3. 运行魔法 CLI
+### 前置依赖
+
+```bash
+# 安装 v4l-utils 用于摄像头检测
+sudo apt install v4l-utils
+
+# 安装 ROS2 image_tools
+sudo apt install ros-${ROS_DISTRO}-image-tools
+```
+
+### 运行
+
+```bash
 python3 scripts/camera_cli.py
 ```
 
-跟随交互式向导：
-1. 查看检测到的摄像头（手机、Webcam 等）
-2. 选择要使用的设备
-3. 命名它们（例如：`front_cam`, `robot_eye`）
-4. **启动！**
+交互式向导将引导你：
+1. **扫描** — 检测所有已连接的摄像头
+2. **选择** — 选择要配置的摄像头
+3. **配置** — 设置分辨率、帧率、ROS 命名空间
+4. **生成** — 创建开箱即用的启动脚本
 
-## 🛠️ 使用方法
+---
+
+## 📂 输出结构
+
+```
+generated_cameras/
+├── start_cam_front.sh      # 单个摄像头脚本
+├── start_cam_wrist.sh      # 单个摄像头脚本
+└── start_all_cams.sh       # 一键启动所有
+```
+
+**启动所有摄像头：**
+```bash
+./generated_cameras/start_all_cams.sh
+```
+
+**用 image_view 验证：**
+```bash
+ros2 run image_view image_view --ros-args -r image:=/hdas/camera_front/color/image_raw
+```
+
+---
+
+## 🛠️ 使用模式
 
 ### 交互模式（推荐）
 
@@ -113,27 +183,49 @@ python3 scripts/camera_cli.py
 python3 scripts/camera_cli.py
 ```
 
-这将启动 TUI（文本用户界面）。它将引导您选择分辨率、帧率并为您的 ROS 话题命名。
-
 ### 从配置重新生成
 
-与队友分享了项目？他们可以通过配置文件生成完全相同的启动脚本：
+与队友分享你的 `cameras.json`：
 
 ```bash
 python3 scripts/camera_cli.py --from-config
 ```
 
-## 📂 生成文件结构
+### 自定义路径
 
-输出清晰整洁，可随时部署：
-
-```text
-generated_cameras/
-├── start_cam_front.sh      # 单独启动脚本 (已 chmod +x)
-├── start_cam_wrist.sh      # 单独启动脚本
-└── start_all_cams.sh       # 总开关，一次启动所有摄像头
+```bash
+python3 scripts/camera_cli.py \
+  --config /path/to/cameras.json \
+  --output-dir /path/to/scripts/
 ```
+
+---
+
+## 📦 环境要求
+
+| 依赖 | 描述 |
+|------|------|
+| **Linux** | 需要 V4L2 设备支持 |
+| **Python 3.8+** | CLI 运行环境 |
+| **ROS2** | `image_tools` 包 |
+| **v4l-utils** | 摄像头检测 (`v4l2-ctl`) |
+
+---
+
+## 🤝 贡献
+
+欢迎贡献！请随时提交 Pull Request。
+
+---
 
 ## 📄 许可证
 
-MIT © [Your Name]
+MIT © [ly-geming](https://github.com/ly-geming)
+
+---
+
+<div align="center">
+
+**⭐ 如果这个项目对你的机器人项目有帮助，请点个 Star！⭐**
+
+</div>

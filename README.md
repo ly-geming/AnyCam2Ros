@@ -1,111 +1,181 @@
-<h1 align="center">
-  <br>
-  AnyCam2Ros
-  <br>
-</h1>
+<div align="center">
 
-<p align="center">
-  <strong>Connect  <i>Any</i> Camera to ROS2 instantly</strong>
-</p>
+# 📷 AnyCam2Ros
 
-<p align="center">
-  Turn your <b>Industrial Cameras</b>, <b>USB Webcams</b>, or even your <b>Android Phone</b> into ROS2 nodes in seconds.
-</p>
+**Turn Any Camera into ROS2 Image Topics — No Expensive Hardware Required**
 
-<p align="center">
-  <a href="#why-anycam">Why AnyCam?</a> •
-  <a href="#features">Features</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#android-as-webcam">Phone as Camera</a> •
-  <a href="./README_zh.md">中文文档</a>
-</p>
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![ROS2](https://img.shields.io/badge/ROS2-Humble%20%7C%20Iron%20%7C%20Jazzy-green.svg)](https://docs.ros.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python 3.8+">
-  <img src="https://img.shields.io/badge/ROS2-Humble%20%7C%20Iron%20%7C%20Jazzy-green.svg" alt="ROS2">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
-  <img src="https://img.shields.io/badge/AnyCam-Universal-purple.svg" alt="AnyCam">
-</p>
+[English](README.md) | [中文文档](README_zh.md)
+
+</div>
 
 ---
 
-<p align="center">
-  <i>No more writing repetitive launch files. <br>Auto-discovery, Interactive Configuration, and One-Click Launch.</i>
-</p>
+## 📖 Overview
 
----
+### 🎯 What Problem Does This Solve?
 
-```mermaid
-graph LR
-    A[📱 Phone / 📷 USB Cam] -->|USB/WiFi| B[Linux /dev/video*]
-    B --> C[AnyCam2Ros]
-    C -->|Generate| D[Startup Scripts]
-    D -->|Run| E[ROS 2 Topic]
+When deploying **VLA models** (like [π₀ (pi-zero)](https://www.physicalintelligence.company/blog/pi0), [OpenVLA](https://openvla.github.io/)) on real robots, or collecting **SFT demonstration data** for robot learning, you need camera feeds as ROS2 image topics. 
+
+But here's the frustrating reality:
+
+```
+The Problem:
+┌─────────────────────────────────────────────────────────────────────────┐
+│  💸 "I need to buy a $300+ RealSense just to test my VLA model?"        │
+│  🔧 "My DIY robot arm doesn't have a standard camera mount"             │
+│  📱 "I have 3 old phones sitting in a drawer..."                        │
+│  ⏰ "Writing cam2image launch files for each camera is tedious"          │
+│  🔀 "Camera device IDs keep changing after every reboot!"               │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Why "AnyCam"?
+**AnyCam2Ros solves all of this:**
 
-In the Linux world, **everything is a file**. 
+```
+The Solution:
+┌─────────────────────────────────────────────────────────────────────────┐
+│  📱 Android Phone     ─┐                                                │
+│  📷 USB Webcam        ─┼──▶  /dev/video*  ──▶  AnyCam2Ros  ──▶  ROS2   │
+│  🎥 Any V4L2 Device   ─┘                         CLI           Topics  │
+│                                                                         │
+│  ✅ Zero-cost hardware (use what you have)                              │
+│  ✅ Stable device paths (no more reordering)                            │
+│  ✅ One command to configure everything                                 │
+│  ✅ Production-ready launch scripts                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+```
 
-If your device can produce a video stream, there is a 99% chance it can be mapped to a `/dev/video*` file. 
-**AnyCam2Ros** doesn't care if you spent $5000 on a global-shutter machine vision camera or $0 using your old Android phone. 
+**AnyCam2Ros = Any Camera → ROS2 Image Topics → VLA Training / Robot Deployment**
 
-**If it's in `/dev/video*`, we can make it a ROS topic.**
+### 🤖 Use Cases
+
+| Scenario | How AnyCam2Ros Helps |
+|----------|---------------------|
+| **VLA Model Deployment** | Use your phone as the robot's eye to test π₀, OpenVLA, RT-2 |
+| **SFT Data Collection** | Collect manipulation demos without buying expensive cameras |
+| **DIY Robot Arms** | Mount any USB camera or phone on your custom robot |
+| **Multi-Camera Setup** | Configure 2-4 cameras in minutes, not hours |
+| **Rapid Prototyping** | Start testing immediately with zero hardware investment |
+
+---
+
+## 💡 Why "Any" Camera?
+
+In Linux, **everything is a file**. If your device can produce video, it becomes `/dev/video*`.
+
+| Device Type | Example | Works with AnyCam2Ros? |
+|-------------|---------|------------------------|
+| USB Webcam | Logitech C920 | ✅ Yes |
+| Industrial Camera | FLIR, Basler (with V4L2 driver) | ✅ Yes |
+| Android Phone | Via USB Webcam mode or DroidCam | ✅ Yes |
+| Capture Card | Elgato, cheap HDMI grabbers | ✅ Yes |
+| Virtual Camera | OBS Virtual Cam, v4l2loopback | ✅ Yes |
+
+**If it shows up in `/dev/video*`, we can publish it to ROS2.**
+
+---
+
+## 📱 Turn Your Phone into a Robot Camera
+
+You don't need a RealSense. Your phone camera is probably better than most webcams anyway.
+
+### Method 1: Native USB Webcam Mode (Easiest)
+
+Many modern Android phones have built-in USB webcam support:
+
+1. Connect phone to computer via USB
+2. In the USB options popup, select **"Webcam"** (not "File Transfer")
+3. Your phone appears as `/dev/videoX` — done!
+
+> ✅ Tested on: Google Pixel 4+, Samsung Galaxy S20+, OnePlus 8+
+
+### Method 2: Apps (Universal)
+
+| App | Platform | Connection | Notes |
+|-----|----------|------------|-------|
+| **DroidCam** | Android/iOS | USB or WiFi | Free, reliable |
+| **Iriun Webcam** | Android/iOS | USB or WiFi | High quality |
+| **IP Webcam** | Android | WiFi only | Good for wireless |
+
+**Recommended setup:** USB connection for lowest latency (important for real-time robot control).
+
+---
 
 ## ✨ Features
 
-- **📱 Universal Support** — Works with USB cams, potential virtual cams, and phone-based webcams.
-- **🔍 Auto-Discovery** — Instantly scans `/dev/video*` and identifies your hardware.
-- **🛡️ Stable Paths** — Automatically resolves stable paths (`/dev/v4l/by-id`) so your camera order never swaps after a reboot.
-- **🎨 Beautiful CLI** — A rich, interactive terminal experience to guide you through setup.
-- **⚡ Zero-Boilerplate** — Generates optimized `cam2image` launch scripts ready for production.
+| Feature | Description |
+|---------|-------------|
+| 🔍 **Auto-Discovery** | Scans all `/dev/video*` devices and shows hardware info |
+| 🛡️ **Stable Paths** | Uses `/dev/v4l/by-id` so camera order survives reboots |
+| 🎨 **Beautiful CLI** | Rich interactive TUI with tables, spinners, and colors |
+| ⚡ **Zero Boilerplate** | Generates optimized `cam2image` scripts instantly |
+| 📦 **Shareable Config** | JSON config for team collaboration |
 
-## 📱 Making an Android Phone a ROS Camera
+---
 
-You don't need expensive hardware to start developing computer vision algorithms. Your phone is likely a better camera than most webcams!
+## 🚀 Quick Start
 
-1. **USB Webcam Mode (Easiest)**
-   - Many modern Android phones (Google Pixel, Samsung, etc.) have a native "Webcam" mode when you plug them into USB.
-   - Select "Webcam" instead of "File Transfer".
-   - It will appear as `/dev/videoX` on your computer. Done!
-
-2. **Apps (Universal)**
-   - Install apps like **DroidCam**, **IP Webcam**, or **Iriun**.
-   - Connect via USB (recommended for low latency) or WiFi.
-   - These tools create a virtual video device (e.g. via `v4l2loopback`) or exposed standard UVC interfaces.
-
-Once your phone is connected, just run `AnyCam2Ros` and it will detect it like any other camera.
-
-## 📦 Requirements
-
-| Dependency | Description |
-|------------|-------------|
-| **Linux** | Required for V4L2 device handling |
-| **Python 3.8+** | CLI runtime |
-| **ROS2** | Needs `image_tools` package (`sudo apt install ros-<distro>-image-tools`) |
-| **v4l-utils** | For hardware probing (`sudo apt install v4l-utils`) |
-
-## ⚡ Quick Start
+### Installation
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-username/AnyCam2Ros.git
+# Clone the repository
+git clone https://github.com/ly-geming/AnyCam2Ros.git
 cd AnyCam2Ros
 
-# 2. Install dependencies (Rich for beautiful UI)
+# Install (includes Rich for beautiful CLI)
 pip install -e .
+```
 
-# 3. Run the Magic CLI
+### Prerequisites
+
+```bash
+# Install v4l-utils for camera detection
+sudo apt install v4l-utils
+
+# Install ROS2 image_tools
+sudo apt install ros-${ROS_DISTRO}-image-tools
+```
+
+### Running
+
+```bash
 python3 scripts/camera_cli.py
 ```
 
-Follow the interactive wizard:
-1. View detected cameras (Phone, Webcam, etc.)
-2. Select which ones to use
-3. Name them (e.g., `front_cam`, `robot_eye`)
-4. **Launch!**
+The interactive wizard will:
+1. **Scan** — Detect all connected cameras
+2. **Select** — Choose which cameras to configure
+3. **Configure** — Set resolution, FPS, ROS namespace
+4. **Generate** — Create ready-to-run launch scripts
 
-## 🛠️ Usage
+---
+
+## 📂 Output Structure
+
+```
+generated_cameras/
+├── start_cam_front.sh      # Individual camera script
+├── start_cam_wrist.sh      # Individual camera script  
+└── start_all_cams.sh       # Launch everything with one command
+```
+
+**Start all cameras:**
+```bash
+./generated_cameras/start_all_cams.sh
+```
+
+**Verify with image_view:**
+```bash
+ros2 run image_view image_view --ros-args -r image:=/hdas/camera_front/color/image_raw
+```
+
+---
+
+## 🛠️ Usage Modes
 
 ### Interactive Mode (Recommended)
 
@@ -113,27 +183,49 @@ Follow the interactive wizard:
 python3 scripts/camera_cli.py
 ```
 
-This launches the TUI (Text User Interface). It will guide you through selecting resolution, FPS, and naming your ROS topics.
-
 ### Regenerate from Config
 
-Shared your project with a teammate? They can generate the same launch scripts from the config file:
+Share your `cameras.json` with teammates:
 
 ```bash
 python3 scripts/camera_cli.py --from-config
 ```
 
-## 📂 Generated Structure
+### Custom Paths
 
-Your output is clean and ready to deploy:
-
-```text
-generated_cameras/
-├── start_cam_front.sh      # Individual launch script (chmod +x)
-├── start_cam_wrist.sh      # Individual launch script
-└── start_all_cams.sh       # Master switch to launch EVERYTHING
+```bash
+python3 scripts/camera_cli.py \
+  --config /path/to/cameras.json \
+  --output-dir /path/to/scripts/
 ```
+
+---
+
+## 📦 Requirements
+
+| Dependency | Description |
+|------------|-------------|
+| **Linux** | Required for V4L2 device handling |
+| **Python 3.8+** | CLI runtime |
+| **ROS2** | `image_tools` package |
+| **v4l-utils** | Camera detection (`v4l2-ctl`) |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to submit a Pull Request.
+
+---
 
 ## 📄 License
 
-MIT © [Your Name]
+MIT © [ly-geming](https://github.com/ly-geming)
+
+---
+
+<div align="center">
+
+**⭐ Star this repo if it helps your robot project! ⭐**
+
+</div>
